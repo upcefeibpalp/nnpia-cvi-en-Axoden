@@ -8,13 +8,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class UserService {
-    private Logger logger = LoggerFactory.getLogger(UserService.class);
-    private Map<Long, User> users = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final Map<Long, User> users = new HashMap<>();
 
     @PostConstruct
     public void init() {
