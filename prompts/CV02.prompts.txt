@@ -1,0 +1,119 @@
+Použitá AI služba: ChatGPT
+
+Prompty použité pro úkoly:
+
+7. Vytvoření složky prompts a přidání Spring Boot DevTools AI
+Do projektu přidejte závislost Spring Boot DevTools.
+
+
+-   Vytvoření složky prompts a přidání Spring Boot DevTools AI, Do projektu přidejte závislost Spring Boot DevTools.
+
+8. Teoretické úkoly AI
+-   K čemu slouží závislost Spring Boot DevTools?
+-   Jaká je její největší výhoda?
+
+?   K čemu slouží závislost Spring Boot DevTools?
+?   Jaká je její největší výhoda?
+
+9. Přidání dvou nových endpointů do UserController AI
+-   Upravte endpoint /user aby přijal ID uživatele jako Query parameter (/user?id=1) a vrátí odpovídající instanci třídy User.
+-   Otestujte endpoint pomocí Postmanu.
+-   Upravte endpoint /user aby přijal ID uživatele jako Path parameter (/user/{id}) a vrátí odpovídající instanci třídy User.
+-   Otestujte endpoint pomocí Postmanu.
+-   Po ověřené funkčnosti přepište adresu endpointu /users vracející všechny uživatele na /user.
+-   Otestujte endpoint pomocí Postmanu.
+
+? 9. Přidání dvou nových endpointů do UserController AI
+  Upravte endpoint /user aby přijal ID uživatele jako Query parameter (/user?id=1) a vrátí odpovídající instanci třídy User.
+  Otestujte endpoint pomocí Postmanu.
+  Upravte endpoint /user aby přijal ID uživatele jako Path parameter (/user/{id}) a vrátí odpovídající instanci třídy User.
+  Otestujte endpoint pomocí Postmanu.
+  Po ověřené funkčnosti přepište adresu endpointu /users vracející všechny uživatele na /user.
+
+  package cz.upce.fei.nnpiacv.controller;
+
+  import cz.upce.fei.nnpiacv.domain.User;
+  import cz.upce.fei.nnpiacv.service.UserService;
+  import org.springframework.web.bind.annotation.GetMapping;
+  import org.springframework.web.bind.annotation.RestController;
+
+  import java.util.Collection;
+
+  @RestController
+  public class UserController {
+      private final UserService userService;
+
+      public UserController(UserService userService) {
+          this.userService = userService;
+      }
+
+      @GetMapping("/users")
+      public Collection<User> findUsers() {
+          return userService.findUsers();
+      }
+
+      @GetMapping("/user")
+      public String sayGreeting() {
+          return userService.findUser();
+      }
+  }
+
+  package cz.upce.fei.nnpiacv.service;
+
+  import cz.upce.fei.nnpiacv.domain.User;
+  import jakarta.annotation.PostConstruct;
+  import org.slf4j.Logger;
+  import org.slf4j.LoggerFactory;
+  import org.springframework.stereotype.Service;
+
+  import java.util.Collection;
+  import java.util.HashMap;
+  import java.util.Map;
+
+  @Service
+  public class UserService {
+      private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+      private final Map<Long, User> users = new HashMap<>();
+
+      @PostConstruct
+      public void init() {
+          User user = new User(0L, "pepa@upce.cz", "lmaoxd");
+          User user1 = new User(1L, "lojza@upce.cz", "kekw");
+
+          users.put(user.getId(), user);
+          users.put(user1.getId(), user1);
+      }
+
+      public Collection<User> findUsers() {
+          return users.values().stream().toList();
+      }
+
+      /*
+      public UserService() {
+          User user = new User(0L, "pepa@upce.cz", "lmaoxd");
+          User user1 = new User(1L, "lojza@upce.cz", "kekw");
+
+          users.put(user.getId(), user);
+          users.put(user1.getId(), user1);
+      }
+      */
+
+      public String findUser() {
+          logger.info("User created: {}", users.get(0L).toString());
+          return users.get(0L).toString();
+      }
+  }
+
+
+  package cz.upce.fei.nnpiacv.domain;
+
+  import lombok.*;
+
+  @AllArgsConstructor
+  @Data
+  public class User {
+      private long id;
+      private String email;
+      private String passsword;
+  }
+
