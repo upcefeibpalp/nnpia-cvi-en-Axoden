@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -41,5 +42,9 @@ public class UserService {
     public String findUser() {
         logger.info("User created: {}", users.get(0L).toString());
         return users.get(0L).toString();
+    }
+
+    public Optional<User> findUserById(Long id) {
+        return Optional.ofNullable(users.get(id));
     }
 }
