@@ -1,0 +1,199 @@
+?
+Někdy se dostanete do situace kdy budete potřebovat vědět jaké SQL dotazy se posílají do databáze. Upravte application.properties tak aby logovala SQL dotazy.
+
+spring.application.name=nnpiacv
+server.port=9000
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/nnpia
+spring.datasource.username=nnpia
+spring.datasource.password=nnpia
+
+spring.jpa.hibernate.ddl-auto=update
+
+-
+spring.application.name=nnpiacv
+server.port=9000
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/nnpia
+spring.datasource.username=nnpia
+spring.datasource.password=nnpia
+
+spring.jpa.hibernate.ddl-auto=update
+
+# Zobrazování SQL dotazů v konzoli
+spring.jpa.show-sql=true
+# Hezké formátování SQL dotazů
+spring.jpa.properties.hibernate.format_sql=true
+# Logování SQL dotazů na úrovni DEBUG
+logging.level.org.hibernate.SQL=DEBUG
+# Logování parametrů při bindingu na úrovni TRACE
+logging.level.org.hibernate.type.descriptor.sql=TRACE
+
+Vysvětlení:
+spring.jpa.show-sql=true – Zapne výpis SQL dotazů do konzole.
+spring.jpa.properties.hibernate.format_sql=true – Naformátuje SQL dotazy pro lepší čitelnost.
+logging.level.org.hibernate.SQL=DEBUG – Nastaví logování SQL dotazů na úroveň DEBUG.
+logging.level.org.hibernate.type.descriptor.sql=TRACE – Umožní logovat hodnoty parametrů, které se vážou na SQL dotazy.
+Tímto způsobem získáte podrobné informace o tom, jaké SQL dotazy jsou odesílány do databáze.
+
+?
+Zjištěte všechny hodnoty vlastnosti spring.jpa.hibernate.ddl-auto a co tyto hodnoty znamenají.
+K čemu slouží anotace @GeneratedValue a jakých hodnoto může nabývat parametr stragety.
+K čemu slouží anotace @Column.
+K čemu slouží anotace @Transactional.
+K čemu slouží anotace @Query.
+K čemu slouží anotace @JsonIgnore.
+
+-
+1. Hodnoty vlastnosti spring.jpa.hibernate.ddl-auto a jejich význam
+Tato vlastnost určuje, jak se má Hibernate chovat při správě databázového schématu na základě definic entit. Mezi běžné hodnoty patří:
+
+none
+Hibernate nebude provádět žádné operace se schématem.
+validate
+Hibernate pouze zkontroluje, zda databázové schéma odpovídá definicím entit. Pokud ne, vyvolá chybu.
+update
+Hibernate automaticky upraví schéma (například přidá nové sloupce), aby odpovídalo aktuálním entitám. Vhodné pro vývoj, ale obezřetně v produkci.
+create
+Při spuštění aplikace Hibernate vytvoří nové schéma, přičemž existující data mohou být ztracena.
+create-drop
+Hibernate vytvoří schéma při spuštění a po ukončení aplikace ho odstraní.
+2. Anotace @GeneratedValue a možné hodnoty parametru strategy
+Anotace @GeneratedValue se používá ve spojení s @Id pro automatickou generaci hodnot primárního klíče entity. Parametr strategy určuje, jakým způsobem se bude hodnota generovat. Možné hodnoty jsou:
+
+GenerationType.AUTO
+Poskytovatel persistence sám vybere nejvhodnější strategii pro konkrétní databázi.
+GenerationType.IDENTITY
+Používá se databázový sloupec s auto-increment (identita), kdy databáze automaticky generuje hodnotu při vložení.
+GenerationType.SEQUENCE
+Používá sekvenci v databázi, která generuje unikátní hodnoty. Často se kombinuje s anotací @SequenceGenerator.
+GenerationType.TABLE
+Pro generování se využívá speciální tabulka, která uchovává hodnoty generovaných klíčů.
+3. Anotace @Column
+Anotace @Column se používá pro mapování atributu třídy na konkrétní sloupec v databázové tabulce. Umožňuje specifikovat:
+
+Název sloupce (např. @Column(name = "nazev_sloupce"))
+Datový typ, délku, přesnost, měřítko
+Zda může být hodnota NULL nebo zda má být sloupec unikátní
+Tímto způsobem lze jemně doladit, jak budou data uložena v databázi.
+
+4. Anotace @Transactional
+Anotace @Transactional se používá v rámci Springu k definování transakčních hranic:
+
+Označuje, že metody nebo třídy budou prováděny v rámci databázové transakce.
+Zajišťuje, že všechny operace v transakci budou buď úspěšně provedeny (commit), nebo v případě chyby vráceny (rollback).
+Umožňuje snadné řízení konzistence dat při práci s databází.
+5. Anotace @Query
+Anotace @Query se používá v rámci Spring Data JPA k definování vlastních dotazů:
+
+Umožňuje přímo zadat JPQL nebo nativní SQL dotaz, který se má vykonat na repository metodě.
+Užitečné v případech, kdy konvence pojmenování metod nepostačují k vyjádření požadovaného dotazu.
+6. Anotace @JsonIgnore
+Anotace @JsonIgnore pochází z knihovny Jackson a slouží k řízení serializace/deserializace do/z JSON:
+
+Označí, že dané pole nebo getter/metoda nebude zahrnuta při převodu objektu na JSON.
+Pomáhá například předcházet cyklickým referencím nebo skrýt citlivá data, která nechcete zveřejnit ve výsledném JSON výstupu.
+Tímto způsobem jste získali přehled o konfiguraci Hibernate při správě schématu a základních anotacích, které se běžně využívají ve vývoji Java aplikací s využitím Spring a JPA.
+
+?
+-
+Níže naleznete ukázku, jak vytvořit novou entitu – například UserProfile – která bude mít jeden navázaný vztah s entitou User (zde využijeme vztah One-to-One) a zároveň bude obsahovat alespoň jeden atribut, který se netýká relace (v našem případě atribut bio).
+
+1. Entita UserProfile
+Vytvořte novou třídu UserProfile v balíčku cz.upce.fei.nnpiacv.domain:
+
+java
+Zkopírovat
+package cz.upce.fei.nnpiacv.domain;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "user_profile")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserProfile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Atribut, který není součástí relace – např. popis profilu
+    private String bio;
+
+    // Vztah 1:1 k entitě User
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
+}
+Vysvětlení:
+
+@Entity a @Table: Označují, že jde o entitu, která bude mapována na tabulku user_profile.
+Atribut bio: Představuje volný atribut, který nemá nic společného s relační vazbou.
+@OneToOne a @JoinColumn: Definují jednosměrný vztah s entitou User – sloupec user_id bude odkazovat na primární klíč z tabulky app_user (kde je uložena entita User).
+2. Repository pro entitu UserProfile
+Vytvořte nové rozhraní UserProfileRepository v balíčku cz.upce.fei.nnpiacv.repository:
+
+java
+Zkopírovat
+package cz.upce.fei.nnpiacv.repository;
+
+import cz.upce.fei.nnpiacv.domain.UserProfile;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+}
+3. Aktualizace DataInitializer
+Abychom vložili alespoň jeden záznam do tabulky user_profile ve vztahu s existujícím záznamem z tabulky User, rozšíříme komponentu DataInitializer. Do konstruktoru přidáme injekci UserProfileRepository a vložíme nový záznam:
+
+java
+Zkopírovat
+package cz.upce.fei.nnpiacv.component;
+
+import cz.upce.fei.nnpiacv.domain.User;
+import cz.upce.fei.nnpiacv.domain.UserProfile;
+import cz.upce.fei.nnpiacv.repository.UserRepository;
+import cz.upce.fei.nnpiacv.repository.UserProfileRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+    private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
+    public DataInitializer(UserRepository userRepository, UserProfileRepository userProfileRepository) {
+        this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
+    }
+
+    @Override
+    public void run(String... args) {
+        User user = new User(0L, "admin@upce.cz", "admin");
+
+        if (!userRepository.existsById(user.getId())) {
+            log.info("Admin user created {}", user);
+            userRepository.save(user);
+        }
+
+        // Vytvoření profilu, který bude ve vztahu s již existujícím uživatelem
+        UserProfile profile = new UserProfile();
+        profile.setBio("Profil administrátora");
+        profile.setUser(user);
+
+        log.info("User profile created: {}", profile);
+        userProfileRepository.save(profile);
+    }
+}
+Vysvětlení:
+
+Po ověření/nebo vytvoření záznamu uživatele (admin) vytvoříme nový záznam UserProfile, kde nastavíme volný atribut bio a navážeme vztah k uživateli.
+Tím je do databáze vložen záznam, který propojuje tabulku user_profile s tabulkou app_user.
+Tento postup splňuje zadání – vytvořili jsme novou entitu s vlastním atributem a relací na entitu User, a zároveň jsme do databáze vložili příklad záznamu, který tyto dvě entity propojuje.
+
+
