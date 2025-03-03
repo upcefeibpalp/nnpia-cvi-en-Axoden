@@ -14,56 +14,33 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class UserService {
-    private final Map<Long, User> users = new HashMap<>();
     private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @PostConstruct
-    public void init() {
-        /*
-        User user = new User(0L, "pepa@upce.cz", "lmaoxd");
-        User user1 = new User(1L, "lojza@upce.cz", "kekw");
-
-        users.put(user.getId(), user);
-        users.put(user1.getId(), user1);
-         */
-    }
-
+    // Metoda pro získání všech uživatelů
     public Collection<User> findUsers() {
         return userRepository.findAll();
     }
 
-    public User findUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        log.info("ziskan uzivael {}", user.get());
-
-        return user.orElse(null);
-    }
-    /*
-    public UserService() {
-        User user = new User(0L, "pepa@upce.cz", "lmaoxd");
-        User user1 = new User(1L, "lojza@upce.cz", "kekw");
-
-        users.put(user.getId(), user);
-        users.put(user1.getId(), user1);
-    }
-    */
-
-    /*
-    public String findUser() {
-        logger.info("User created: {}", users.get(0L).toString());
-        return users.get(0L).toString();
-    }
-     */
-
+    // Metoda pro vyhledání uživatele dle id
     public Optional<User> findUserById(Long id) {
-        return Optional.ofNullable(users.get(id));
+        return userRepository.findById(id);
     }
 
+    // Metoda pro vyhledání uživatele dle emailu
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    // NOVÁ metoda pro přidání uživatele
+    public User addUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
     }
 }
