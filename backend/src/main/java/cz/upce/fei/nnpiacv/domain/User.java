@@ -9,9 +9,8 @@ import lombok.*;
 @Table(name = "app_user")
 @NoArgsConstructor
 public class User {
-
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(unique = true)
@@ -19,7 +18,12 @@ public class User {
     private String email;
 
     @NonNull
-    private String passsword;
+    private String password;
+
+    public User(@NonNull String email, @NonNull String password) {
+        this.email = email;
+        this.password = password;
+    }
 
     public void setId(Long id) {
         this.id = id;

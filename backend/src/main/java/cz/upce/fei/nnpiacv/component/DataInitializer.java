@@ -4,6 +4,7 @@ import cz.upce.fei.nnpiacv.domain.User;
 import cz.upce.fei.nnpiacv.domain.UserProfile;
 import cz.upce.fei.nnpiacv.repository.UserRepository;
 import cz.upce.fei.nnpiacv.repository.UserProfileRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -21,17 +22,19 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
-        User user = new User(0L, "admin@upce.cz", "admin");
+        User user = new User("admin@upce.cz", "admin");
 
         if (!userRepository.existsById(user.getId())) {
             log.info("Admin user created {}", user);
-            userRepository.save(user);
+            user = userRepository.saveAndFlush(user);
         }
 
         // Vytvoření profilu, který bude ve vztahu s již existujícím uživatelem
         UserProfile profile = new UserProfile();
         profile.setBio("Profil administrátora");
+        profile = userProfileRepository.save(profile);
         profile.setUser(user);
 
         log.info("User profile created: {}", profile);
