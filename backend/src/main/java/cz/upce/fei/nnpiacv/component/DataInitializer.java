@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
@@ -24,20 +26,28 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        User user = new User("admin@upce.cz", "admin");
-
-        if (!userRepository.existsById(user.getId())) {
-            log.info("Admin user created {}", user);
+        // Look up the admin user by email.
+        User user = userRepository.findByEmail("admin@upce.cz").orElse(null);
+        if (user == null) {
+            user = new User("admin@upce.cz", "admin");
             user = userRepository.saveAndFlush(user);
+            log.info("Admin user created: {}", user);
+        } else {
+            log.info("Admin user already exists: {}", user);
         }
 
-        // Vytvoření profilu, který bude ve vztahu s již existujícím uživatelem
-        UserProfile profile = new UserProfile();
-        profile.setBio("Profil administrátora");
-        profile = userProfileRepository.save(profile);
-        profile.setUser(user);
-
-        log.info("User profile created: {}", profile);
-        userProfileRepository.save(profile);
+        // Check if a profile already exists for this user.
+        Optional<UserProfile> existingProfile = userProfileRepository.findByUser(user);
+        if (existingProfile.isEmpty()) {
+            UserProfile profile = new UserProfile();
+            profile.setBio("Profil administrátora");
+            profile.setUser(user);
+            profile = userProfileRepository.save(profile);
+            log.info("User profile created: {}", profile);
+        } else {
+            log.info("User profile already exists: {}", existingProfile.get());
+        }
     }
+
+
 }
