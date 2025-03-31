@@ -43,6 +43,7 @@ public class UserService {
         return userRepository.findById(id).map(existingUser -> {
             existingUser.setEmail(updateDTO.getEmail());
             existingUser.setPassword(updateDTO.getPassword());
+            existingUser.setActive(updateDTO.getActive());
             return userRepository.save(existingUser);
         });
     }
