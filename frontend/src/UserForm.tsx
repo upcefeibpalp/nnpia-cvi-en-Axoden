@@ -1,17 +1,16 @@
-// src/components/UserForm.tsx
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, TextField, Box, Typography } from '@mui/material';
 
-// Validační schéma
+// Validační schéma (opravené)
 const userSchema = z.object({
     email: z.string().email('Neplatný email'),
     password: z.string()
         .min(6, 'Heslo musí mít alespoň 6 znaků')
         .regex(/[A-Z]/, 'Heslo musí obsahovat velké písmeno')
         .regex(/[0-9]/, 'Heslo musí obsahovat číslo'),
-    active: z.boolean().optional().default(true)
+    active: z.boolean().transform(val => val === undefined ? true : val), // Opraveno
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -24,7 +23,7 @@ const UserForm = () => {
         }
     });
 
-    const onSubmit = (data: UserFormData) => {
+    const onSubmit: SubmitHandler<UserFormData> = (data) => { // Opraveno
         console.log('Form data:', data);
     };
 
